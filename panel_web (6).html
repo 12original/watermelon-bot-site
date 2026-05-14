@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍉 WatermelonBOT Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #080810;
+  --bg1:      #0e0e1a;
+  --bg2:      #131324;
+  --bg3:      #1a1a30;
+  --bg4:      #22223e;
+  --border:   #ffffff0f;
+  --glow:     #6c63ff;
+  --glow2:    #ff6584;
+  --green:    #00ffa3;
+  --yellow:   #ffd166;
+  --red:      #ff4d6d;
+  --blue:     #4fc3f7;
+  --purple:   #c084fc;
+  --text:     #f0f0ff;
+  --text2:    #6060a0;
+  --text3:    #30305a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── CANVAS BACKGROUND ── */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ── TOPBAR ── */
+#topbar {
+  position: relative;
+  z-index: 10;
+  background: rgba(14,14,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 60px;
+  flex-shrink: 0;
+  gap: 14px;
+}
+
+#logo-wrap { display: flex; flex-direction: column; gap: 1px; }
+#logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--glow), var(--glow2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+#ver { font-size: 9px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; }
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  margin-left: 8px;
+}
+#status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  transition: all .4s;
+  flex-shrink: 0;
+}
+#status-dot.online { background: var(--green); box-shadow: 0 0 10px var(--green); animation: statusPulse 2s ease-in-out infinite; }
+@keyframes statusPulse { 0%,100%{ box-shadow: 0 0 8px var(--green); } 50%{ box-shadow: 0 0 18px var(--green), 0 0 30px var(--green)44; } }
+#status-txt { font-size: 11px; color: var(--text2); transition: color .4s; }
+
+#topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+#token-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 12px;
+  transition: border-color .2s;
+}
+#token-wrap:focus-within { border-color: var(--glow)66; box-shadow: 0 0 0 3px var(--glow)11; }
+#token-input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; width: 200px;
+}
+#token-input::placeholder { color: var(--text3); }
+#token-eye { cursor: pointer; color: var(--text3); font-size: 12px; transition: color .2s; }
+#token-eye:hover { color: var(--text2); }
+
+.top-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 7px 14px;
+  font-size: 11px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.top-btn:hover { background: rgba(255,255,255,0.09); color: var(--text); border-color: var(--glow)33; }
+.top-btn.green  { background: var(--green)15; border-color: var(--green)44; color: var(--green); }
+.top-btn.green:hover { background: var(--green)25; box-shadow: 0 0 16px var(--green)33; }
+.top-btn.red    { background: var(--red)15; border-color: var(--red)44; color: var(--red); }
+.top-btn.yellow { background: var(--yellow)15; border-color: var(--yellow)44; color: var(--yellow); }
+.top-btn.blue   { background: var(--blue)15; border-color: var(--blue)44; color: var(--blue); }
+
+/* ── BODY ── */
+#body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  background: rgba(14,14,26,0.7);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sb-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 2px;
+  padding: 16px 16px 6px;
+  text-transform: uppercase;
+}
+
+.list-box {
+  margin: 0 8px 4px;
+  border-radius: 10px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  max-height: 140px;
+}
+
+.list-item {
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all .15s;
+  border-radius: 8px;
+  margin: 2px 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-item:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.list-item.active {
+  background: linear-gradient(135deg, var(--glow)22, var(--glow2)11);
+  color: var(--text);
+  border: 1px solid var(--glow)22;
+}
+
+.divider { height: 1px; background: var(--border); margin: 6px 12px; }
+
+#member-search {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  outline: none;
+  color: var(--text2);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  width: calc(100% - 16px);
+  padding: 7px 11px;
+  border-radius: 8px;
+  margin: 0 8px 4px;
+  transition: border-color .2s;
+}
+#member-search:focus { border-color: var(--glow)44; color: var(--text); }
+#member-search::placeholder { color: var(--text3); }
+
+#member-list {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0 8px;
+  padding-bottom: 4px;
+}
+
+#sel-label {
+  font-size: 11px;
+  color: var(--text3);
+  padding: 8px 16px 12px;
+  font-style: italic;
+  flex-shrink: 0;
+  transition: color .3s;
+}
+
+/* ── MAIN ── */
+#main {
+  width: 480px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(10,10,20,0.5);
+  backdrop-filter: blur(10px);
+}
+
+#nav {
+  background: rgba(14,14,26,0.8);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 8px;
+}
+
+.nav-tab {
+  padding: 7px 13px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all .15s;
+  border-radius: 7px;
+  border: 1px solid transparent;
+}
+.nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.nav-tab.active {
+  color: var(--text);
+  background: linear-gradient(135deg, var(--glow)22, var(--glow2)11);
+  border-color: var(--glow)33;
+}
+
+#content { flex: 1; overflow-y: auto; padding: 20px; }
+
+.sec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 18px;
+  letter-spacing: -0.3px;
+}
+
+.field-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 14px 0 6px;
+}
+
+.field {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  border-left: 2px solid var(--glow)66;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.field:focus-within {
+  border-color: var(--glow)44;
+  box-shadow: 0 0 0 3px var(--glow)0d;
+}
+.field input, .field textarea, .field select {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  padding: 10px 12px;
+  flex: 1;
+  resize: none;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: var(--text3); }
+.field select option { background: var(--bg3); }
+
+select.standalone {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+select.standalone:focus { border-color: var(--glow)44; }
+select.standalone option { background: var(--bg2); }
+
+.badge {
+  background: rgba(108,99,255,0.08);
+  border: 1px solid var(--glow)22;
+  border-radius: 10px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.badge .name { color: var(--text); font-weight: 600; }
+.badge .id   { color: var(--text3); font-size: 10px; font-family: 'JetBrains Mono', monospace; }
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 11px 22px;
+  transition: all .2s;
+  margin-top: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.btn:hover::after { opacity: 1; }
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn-green  { background: var(--green); color: #080810; box-shadow: 0 4px 20px var(--green)44; }
+.btn-green:hover { box-shadow: 0 6px 28px var(--green)66; }
+.btn-red    { background: var(--red); color: #fff; box-shadow: 0 4px 20px var(--red)44; }
+.btn-yellow { background: var(--yellow); color: #080810; box-shadow: 0 4px 20px var(--yellow)44; }
+.btn-accent { background: var(--glow); color: #fff; box-shadow: 0 4px 20px var(--glow)44; }
+.btn-purple { background: var(--purple); color: #080810; box-shadow: 0 4px 20px var(--purple)44; }
+.btn-blue   { background: var(--blue); color: #080810; box-shadow: 0 4px 20px var(--blue)44; }
+.btn-accent2{ background: var(--glow2); color: #fff; box-shadow: 0 4px 20px var(--glow2)44; }
+
+.warn-box {
+  background: rgba(255,209,102,0.07);
+  border: 1px solid var(--yellow)33;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  color: var(--yellow);
+  line-height: 1.6;
+}
+
+.radio-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.radio-opt {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text2);
+  transition: all .15s;
+}
+.radio-opt:hover { border-color: var(--glow)44; color: var(--text); }
+.radio-opt.sel {
+  background: var(--glow)22;
+  color: var(--text);
+  border-color: var(--glow)66;
+  box-shadow: 0 0 10px var(--glow)22;
+}
+
+.troll-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.troll-btn {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 12px 10px;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.troll-btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+.troll-btn:active { transform: translateY(0); }
+
+/* ── LOGS ── */
+#logs-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(8,8,16,0.8);
+  backdrop-filter: blur(10px);
+}
+
+#logs-tabs {
+  display: flex;
+  background: rgba(14,14,26,0.8);
+  border-bottom: 1px solid var(--border);
+}
+
+.log-tab {
+  padding: 11px 18px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text2);
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+}
+.log-tab.active { color: var(--glow); border-color: var(--glow); }
+
+#log-header {
+  background: rgba(255,255,255,0.02);
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+#log-header span { font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+
+#log-clear {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 10px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: all .15s;
+}
+#log-clear:hover { color: var(--text2); background: rgba(255,255,255,0.1); }
+
+#log-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.log-line { display: flex; gap: 10px; }
+.log-time { color: var(--text3); flex-shrink: 0; }
+.log-green  { color: var(--green); }
+.log-red    { color: var(--red); }
+.log-yellow { color: var(--yellow); }
+.log-blue   { color: var(--blue); }
+.log-purple { color: var(--purple); }
+.log-dim    { color: var(--text3); }
+
+/* scrollbars */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--glow)44; }
+
+/* modal */
+#modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+#modal-overlay.show { display: flex; }
+
+#modal {
+  background: var(--bg2);
+  border: 1px solid var(--glow)33;
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 40px var(--glow)11;
+  animation: modalIn .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalIn {
+  from { transform: scale(.88) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+#modal h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, var(--glow), var(--glow2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+#modal p { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 22px; }
+#modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+#modal-ok   { background: var(--red); color: #fff; box-shadow: 0 4px 16px var(--red)44; }
+#modal-cancel { background: rgba(255,255,255,0.08); color: var(--text2); box-shadow: none; }
+
+#file-drop {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 11px;
+  transition: all .15s;
+  margin-top: 8px;
+}
+#file-drop:hover, #file-drop.dragover {
+  border-color: var(--glow)66;
+  color: var(--glow);
+  background: var(--glow)08;
+}
+#file-drop input { display: none; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border: 2px solid var(--border);
+  border-top-color: var(--glow);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* ── ENTRY ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#topbar  { animation: fadeUp .4s ease both; }
+#sidebar { animation: fadeUp .45s .05s ease both; }
+#main    { animation: fadeUp .45s .1s ease both; }
+#logs-panel { animation: fadeUp .45s .15s ease both; }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div id="logo-wrap">
+    <div id="logo">🍉 WatermelonBOT</div>
+    <div id="ver">Panel · Web Edition</div>
+  </div>
+
+  <div class="status-badge">
+    <div id="status-dot"></div>
+    <span id="status-txt">Оффлайн</span>
+  </div>
+
+  <div id="topbar-right">
+    <div id="token-wrap">
+      <span style="color:var(--text3);font-size:11px">🔑</span>
+      <input id="token-input" type="password" placeholder="Вставте токен..." autocomplete="off">
+      <span id="token-eye" onclick="toggleTokenVis()">👁</span>
+    </div>
+    <button class="top-btn" id="tok-type-btn" onclick="toggleTokenType()">🤖 Bot</button>
+    <button class="top-btn green" onclick="connectBot()">▶ Підключити</button>
+    <button class="top-btn" onclick="refreshAll()">↺ Оновити</button>
+  </div>
+</div>
+
+<!-- BODY -->
+<div id="body">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-label">Сервери</div>
+    <div class="list-box" id="guild-list" style="max-height:140px"></div>
+    <div class="divider"></div>
+    <div class="sb-label">Учасники</div>
+    <input id="member-search" placeholder="Пошук..." oninput="filterMembers()">
+    <div id="member-list"></div>
+    <div id="sel-label">Нікого не обрано</div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="nav">
+      <div class="nav-tab active" onclick="switchTab('msg')">💬 Написати</div>
+      <div class="nav-tab"        onclick="switchTab('timeout')">⏱ Таймаут</div>
+      <div class="nav-tab"        onclick="switchTab('kick')">👢 Кік</div>
+      <div class="nav-tab"        onclick="switchTab('ban')">🔨 Бан</div>
+      <div class="nav-tab"        onclick="switchTab('unban')">✅ Розбан</div>
+      <div class="nav-tab"        onclick="switchTab('troll')">😈 ТРОЛЬ</div>
+    </div>
+    <div id="content"></div>
+  </div>
+
+  <!-- LOGS -->
+  <div id="logs-panel">
+    <div id="logs-tabs">
+      <div class="log-tab active">🤖 Логи</div>
+      <div class="log-tab" style="color:var(--green);border-bottom:2px solid var(--green)">
+        📊 Статус: <span id="stat-text">очікування...</span>
+      </div>
+    </div>
+    <div id="log-header">
+      <span>Консоль</span>
+      <button id="log-clear" onclick="clearLogs()">Очистити</button>
+    </div>
+    <div id="log-area"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <h3 id="modal-title">Підтвердження</h3>
+    <p  id="modal-body"></p>
+    <div id="modal-btns">
+      <button class="btn btn-accent" id="modal-cancel" onclick="modalCancel()">Скасувати</button>
+      <button class="btn btn-red"    id="modal-ok"     onclick="modalConfirm()">Підтвердити</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ANIMATED BACKGROUND PARTICLES ──────────────────────
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], lines = [];
+  
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Орбіти / частинки
+  for (let i = 0; i < 55; i++) {
+    particles.push({
+      x: Math.random() * 1500,
+      y: Math.random() * 900,
+      r: Math.random() * 1.5 + 0.3,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      alpha: Math.random() * 0.5 + 0.1,
+      color: Math.random() > 0.5 ? '108,99,255' : '255,101,132',
+    });
+  }
+
+  // Великі glow-кулі
+  const blobs = [
+    { x: 0.15, y: 0.2, r: 280, color: '108,99,255', speed: 0.0003, phase: 0 },
+    { x: 0.8,  y: 0.7, r: 240, color: '255,101,132', speed: 0.0004, phase: 2 },
+    { x: 0.5,  y: 0.5, r: 200, color: '0,255,163', speed: 0.0002, phase: 4 },
+  ];
+
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    t += 0.01;
+
+    // Blobs
+    blobs.forEach(b => {
+      const cx = (b.x + Math.sin(t * b.speed * 1000 + b.phase) * 0.08) * W;
+      const cy = (b.y + Math.cos(t * b.speed * 800  + b.phase) * 0.06) * H;
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, b.r);
+      grad.addColorStop(0, `rgba(${b.color},0.06)`);
+      grad.addColorStop(1, `rgba(${b.color},0)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+    });
+
+    // Particles
+    particles.forEach(p => {
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.color},${p.alpha})`;
+      ctx.fill();
+    });
+
+    // Connections
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(108,99,255,${0.08 * (1 - dist/120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── ПОКРАЩЕНИЙ STATUS ──────────────────────────────────
+function setStatus(online, label = "") {
+  const dot = document.getElementById("status-dot");
+  const txt = document.getElementById("status-txt");
+  if (online) {
+    dot.classList.add("online");
+    txt.style.color = "var(--green)";
+  } else {
+    dot.classList.remove("online");
+    dot.style.background = "var(--red)";
+    dot.style.boxShadow = "0 0 8px var(--red)";
+    txt.style.color = "var(--red)";
+  }
+  txt.textContent = online ? `Онлайн • ${label}` : "Оффлайн";
+}
+</script>
+
+<script>
+
+// ══════════════════════════════════════════════════════
+//  СТАН
+// ══════════════════════════════════════════════════════
+let token     = "";
+let tokenType = "Bot"; // "Bot" | "User"
+let guilds    = [];
+let members   = [];
+let channels  = [];
+let selGuild  = null;
+let selMember = null;
+let curTab    = "msg";
+let modalCb   = null;
+
+const MEME_GIFS = [
+  "https://media.tenor.com/x8v1oNUOmg4AAAAC/rickroll.gif",
+  "https://media.tenor.com/2ywPIFNAcDcAAAAC/cat-dancing.gif",
+  "https://media.tenor.com/oP5oEjxzNdoAAAAC/cat-party.gif",
+  "https://media.tenor.com/ZBBmLR6CnOEAAAAC/surprised-pikachu.gif",
+  "https://media.tenor.com/wnPqjPsGe3AAAAAC/bonk.gif",
+  "https://media.tenor.com/kf_q7KgXivwAAAAC/trollface.gif",
+  "https://media.tenor.com/RFHGcE4EHaMAAAAC/cat-staring.gif",
+];
+const MEME_TEXTS = [
+  "🎉 ПРИВІТ! Просто кажу привіт 👋",
+  "🍉 Кавун відправив вітання!",
+  "😈 ХА-ХА-ХА ТРОЛЬ",
+  "🎭 Ти впав у нашу пастку!",
+  "🚨 Це жарт. Але якщо ні — 😳",
+  "👀 Хтось думає про тебе прямо зараз...",
+  "🤡 Клоун детектор спрацював!",
+];
+const SPAM_TEXTS = [
+  "🍉 WatermelonBOT says hi!",
+  "😈 ти не можеш мене зупинити",
+  "🎭 HAHAHAHAHA TROLL",
+  "👀 я всюди",
+  "🤡 клоун? ні, це ти",
+  "🚨 УВАГА УВАГА УВАГА",
+  "💀 gg ez",
+];
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+
+// ══════════════════════════════════════════════════════
+//  ЛОГИ
+// ══════════════════════════════════════════════════════
+function log(text, cls = "dim") {
+  const area = document.getElementById("log-area");
+  const t = new Date().toLocaleTimeString("uk-UA", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const d = document.createElement("div");
+  d.className = "log-line";
+  d.innerHTML = `<span class="log-time">[${t}]</span><span class="log-${cls}">${escHtml(text)}</span>`;
+  area.appendChild(d);
+  area.scrollTop = area.scrollHeight;
+}
+function clearLogs() { document.getElementById("log-area").innerHTML = ""; }
+function escHtml(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ══════════════════════════════════════════════════════
+//  DISCORD API
+// ══════════════════════════════════════════════════════
+function authHeader() {
+  return tokenType === "Bot" ? `Bot ${token}` : token;
+}
+
+let CF_WORKER = localStorage.getItem("cf_worker") || "https://hidden-sun-8287.cerneckijnikita4.workers.dev";
+
+async function api(method, endpoint, body = null) {
+  const base = CF_WORKER.replace(/\/+$/, "");
+  const url = `${base}/discord${endpoint}`;
+  const h = { "Authorization": authHeader(), "Content-Type": "application/json" };
+  const opts = { method, headers: h };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    return await fetch(url, opts);
+  } catch(e) {
+    log(`❌ ${e.message}`, "red");
+    return null;
+  }
+}
+
+async function apiUpload(channelId, file, caption = "") {
+  const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
+  const fd = new FormData();
+  fd.append("file", file, file.name);
+  if (caption) fd.append("content", caption);
+  try {
+    const r = await fetch(url, { method: "POST", headers: { "Authorization": authHeader() }, body: fd });
+    return r;
+  } catch(e) {
+    log(`❌ Upload помилка: ${e.message}`, "red");
+    return null;
+  }
+}
+
+async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ══════════════════════════════════════════════════════
+//  ТОКЕН / ПІДКЛЮЧЕННЯ
+// ══════════════════════════════════════════════════════
+function toggleTokenVis() {
+  const inp = document.getElementById("token-input");
+  inp.type = inp.type === "password" ? "text" : "password";
+}
+
+function toggleTokenType() {
+  const btn = document.getElementById("tok-type-btn");
+  if (tokenType === "Bot") {
+    tokenType = "User";
+    btn.textContent = "👤 User";
+    btn.className = "top-btn yellow";
+    log("🔑 Режим: User (self-bot) — без префікса Bot", "yellow");
+  } else {
+    tokenType = "Bot";
+    btn.textContent = "🤖 Bot";
+    btn.className = "top-btn blue";
+    log("🔑 Режим: Bot токен", "blue");
+  }
+}
+
+async function connectBot() {
+  token = document.getElementById("token-input").value.trim();
+  if (!token) { log("❌ Введи токен!", "red"); return; }
+  log("🔌 Підключення...", "dim");
+  const r = await api("GET", "/users/@me");
+  if (!r) return;
+  if (r.status === 200) {
+    const u = await r.json();
+    const name = u.username || u.global_name || "?";
+    setStatus(true, name);
+    log(`✅ Підключено як: ${name} (ID: ${u.id})`, "green");
+    document.getElementById("stat-text").textContent = `@${name} ✅`;
+    fetchGuilds();
+  } else {
+    const txt = await r.text();
+    log(`❌ Помилка авторизації [${r.status}]: ${txt.slice(0,100)}`, "red");
+    log("💡 Якщо використовуєш user-токен — переключи кнопку Bot→User", "yellow");
+  }
+}
+
+
+
+function refreshAll() {
+  if (!token) { log("❌ Спочатку підключись!", "red"); return; }
+  fetchGuilds();
+}
+
+// ══════════════════════════════════════════════════════
+//  СЕРВЕРИ / УЧАСНИКИ / КАНАЛИ
+// ══════════════════════════════════════════════════════
+async function fetchGuilds() {
+  log("📡 Завантаження серверів...", "dim");
+  const r = await api("GET", "/users/@me/guilds");
+  if (!r || r.status !== 200) { log(`❌ Сервери: ${r?.status ?? "?"}`, "red"); return; }
+  guilds = await r.json();
+  renderGuilds();
+  log(`✅ Серверів: ${guilds.length}`, "green");
+}
+
+function renderGuilds() {
+  const box = document.getElementById("guild-list");
+  box.innerHTML = "";
+  guilds.forEach((g, i) => {
+    const d = document.createElement("div");
+    d.className = "list-item" + (selGuild?.id === g.id ? " active" : "");
+    d.textContent = `  ${g.name}`;
+    d.title = g.id;
+    d.onclick = () => selectGuild(g);
+    box.appendChild(d);
+  });
+}
+
+async function selectGuild(g) {
+  selGuild = g;
+  selMember = null;
+  document.getElementById("sel-label").textContent = "Нікого не обрано";
+  document.getElementById("sel-label").style.color = "";
+  renderGuilds();
+  log(`📌 Сервер: ${g.name}`, "blue");
+  fetchMembers();
+  fetchChannels();
+  switchTab(curTab);
+}
+
+async function fetchMembers() {
+  if (!selGuild) return;
+  log("👥 Завантаження учасників...", "dim");
+  const r = await api("GET", `/guilds/${selGuild.id}/members?limit=1000`);
+  if (!r || r.status !== 200) { log(`❌ Учасники: ${r?.status ?? "?"}`, "red"); return; }
+  const raw = await r.json();
+  members = raw
+    .filter(m => !m.user?.bot)
+    .map(m => ({
+      id:   m.user.id,
+      name: m.nick || m.user.global_name || m.user.username || "?",
+      user: m.user.username || ""
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  renderMembers();
+  log(`👥 Учасників: ${members.length}`, "green");
+}
+
+function renderMembers(filter = "") {
+  const box = document.getElementById("member-list");
+  box.innerHTML = "";
+  const fl = filter.toLowerCase();
+  const vis = members.filter(m =>
+    !fl || m.name.toLowerCase().includes(fl) || m.user.toLowerCase().includes(fl));
+  vis.forEach(m => {
+    const d = document.createElement("div");
+    d.className = "list-item" + (selMember?.id === m.id ? " active" : "");
+    d.textContent = `  ${m.name}`;
+    d.onclick = () => { selMember = m; renderMembers(filter); updateSelLabel(); switchTab(curTab); };
+    box.appendChild(d);
+  });
+}
+
+function filterMembers() {
+  const q = document.getElementById("member-search").value;
+  renderMembers(q === "Пошук..." ? "" : q);
+}
+
+function updateSelLabel() {
+  const l = document.getElementById("sel-label");
+  if (selMember) {
+    l.textContent = `@${selMember.name}`;
+    l.style.color = "var(--accent)";
+    log(`👤 Обрано: @${selMember.name}`, "blue");
+  } else {
+    l.textContent = "Нікого не обрано";
+    l.style.color = "";
+  }
+}
+
+async function fetchChannels() {
+  if (!selGuild) return;
+  const r = await api("GET", `/guilds/${selGuild.id}/channels`);
+  if (!r || r.status !== 200) { log(`❌ Канали: ${r?.status ?? "?"}`, "red"); return; }
+  const all = await r.json();
+  channels = all.filter(c => c.type === 0).sort((a,b) => (a.position||0) - (b.position||0));
+  log(`📢 Каналів: ${channels.length}`, "green");
+  switchTab(curTab);
+}
+
+// ══════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════
+function switchTab(key) {
+  curTab = key;
+  document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+  const tabs = ["msg","timeout","kick","ban","unban","troll"];
+  const idx = tabs.indexOf(key);
+  if (idx >= 0) document.querySelectorAll(".nav-tab")[idx].classList.add("active");
+  const c = document.getElementById("content");
+  c.innerHTML = "";
+  ({ msg, timeout, kick, ban, unban, troll })[key]?.(c);
+}
+
+function chSelect(id = "ch-sel") {
+  const s = document.createElement("select");
+  s.id = id; s.className = "standalone";
+  channels.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.id; o.textContent = `#${c.name}`;
+    s.appendChild(o);
+  });
+  return s;
+}
+
+function badge(p) {
+  if (!selMember) return;
+  const d = document.createElement("div");
+  d.className = "badge";
+  d.innerHTML = `<span style="font-size:20px">👤</span>
+    <div><div class="name">@${selMember.name}</div>
+    <div class="id">ID: ${selMember.id}</div></div>`;
+  p.appendChild(d);
+}
+
+function label(p, text) {
+  const d = document.createElement("div");
+  d.className = "field-label"; d.textContent = text; p.appendChild(d);
+}
+
+function entryField(p, ph = "", type = "text") {
+  const wrap = document.createElement("div"); wrap.className = "field";
+  const inp = document.createElement("input");
+  inp.type = type; inp.placeholder = ph;
+  wrap.appendChild(inp); p.appendChild(wrap);
+  return inp;
+}
+
+// ══════════════════════════════════════════════════════
+//  СЕКЦІЇ
+// ══════════════════════════════════════════════════════
+function msg(p) {
+  p.innerHTML = `<div class="sec-title" style="color:var(--text)">💬 Написати в канал</div>`;
+  label(p, "Канал");
+  const sel = chSelect("msg-ch"); p.appendChild(sel);
+  label(p, "Повідомлення");
+  const wrap = document.createElement("div"); wrap.className = "field";
+  const ta = document.createElement("textarea");
+  ta.rows = 5; ta.placeholder = "Введи повідомлення...";
+  wrap.appendChild(ta); p.appendChild(wrap);
+  const btn = document.createElement("button");
+  btn.className = "btn btn-green"; btn.textContent = "📤  Надіслати";
+  btn.onclick = async () => {
+    const ch = sel.value;
+    const text = ta.value.trim();
+    if (!ch) { log("❌ Обери канал!", "red"); return; }
+    if (!text) { log("❌ Введи повідомлення!", "red"); return; }
+    const r = await api("POST", `/channels/${ch}/messages`, { content: text });
+    if (r && [200,201].includes(r.status)) {
+      log(`💬 Надіслано в канал: ${text.slice(0,60)}`, "green"); ta.value = "";
+    } else { log(`❌ ${r?.status ?? "?"}: ${(await r?.text())?.slice(0,80) ?? ""}`, "red"); }
+  };
+  p.appendChild(btn);
+}
+
+function timeout(p) {
+  p.innerHTML = `<div class="sec-title" style="color:var(--text)">⏱ Таймаут</div>`;
+  badge(p);
+  label(p, "ЧАС");
+  const row = document.createElement("div"); row.className = "radio-row";
+  const opts = [[5,"5хв"],[10,"10хв"],[30,"30хв"],[60,"1год"],[1440,"1день"]];
+  let selMin = 10;
+  opts.forEach(([v, lbl]) => {
+    const d = document.createElement("div"); d.className = "radio-opt" + (v===10?" sel":"");
+    d.textContent = lbl;
+    d.onclick = () => { row.querySelectorAll(".radio-opt").forEach(x=>x.classList.remove("sel")); d.classList.add("sel"); selMin = v; };
+    row.appendChild(d);
+  }); p.appendChild(row);
+  label(p, "Або введи (хв)");
+  const custom = entryField(p, "Кастом хв...");
+  label(p, "ПРИЧИНА");
+  const reason = entryField(p, "Порушення правил");
+  const btn = document.createElement("button");
+  btn.className = "btn btn-yellow"; btn.textContent = "🔇  Дати таймаут";
+  btn.onclick = async () => {
+    if (!selGuild || !selMember) { log("❌ Обери сервер і учасника!", "red"); return; }
+    const mins = parseFloat(custom.value) || selMin;
+    const until = new Date(Date.now() + mins * 60000).toISOString();
+    const r = await api("PATCH", `/guilds/${selGuild.id}/members/${selMember.id}`,
+      { communication_disabled_until: until });
+    if (r && [200,204].includes(r.status))
+      log(`🔇 Таймаут @${selMember.name} на ${mins} хв`, "yellow");
+    else log(`❌ ${r?.status ?? "?"}: ${(await r?.text())?.slice(0,80) ?? ""}`, "red");
+  };
+  p.appendChild(btn);
+}
+
+function kick(p) {
+  p.innerHTML = `<div class="sec-title" style="color:var(--text)">👢 Кік</div>`;
+  badge(p); label(p, "ПРИЧИНА");
+  const reason = entryField(p, "Порушення правил");
+  const btn = document.createElement("button");
+  btn.className = "btn btn-yellow"; btn.textContent = "👢  Кікнути";
+  btn.onclick = () => confirm2("КІК", `Кікнути @${selMember?.name ?? "?"}?`, async () => {
+    if (!selGuild || !selMember) return;
+    const r = await api("DELETE", `/guilds/${selGuild.id}/members/${selMember.id}`);
+    if (r && r.status === 204) { log(`👢 Кік @${selMember.name}`, "yellow"); selMember = null; updateSelLabel(); }
+    else log(`❌ ${r?.status ?? "?"}`, "red");
+  });
+  p.appendChild(btn);
+}
+
+function ban(p) {
+  p.innerHTML = `<div class="sec-title" style="color:var(--text)">🔨 Бан</div>`;
+  badge(p); label(p, "ПРИЧИНА");
+  const reason = entryField(p, "Порушення правил");
+  const btn = document.createElement("button");
+  btn.className = "btn btn-red"; btn.textContent = "🔨  Забанити";
+  btn.onclick = () => confirm2("БАН", `Забанити @${selMember?.name ?? "?"}? Незворотньо!`, async () => {
+    if (!selGuild || !selMember) return;
+    const r = await api("PUT", `/guilds/${selGuild.id}/bans/${selMember.id}`, { delete_message_seconds: 0 });
+    if (r && r.status === 204) { log(`🔨 Бан @${selMember.name}`, "red"); selMember = null; updateSelLabel(); }
+    else log(`❌ ${r?.status ?? "?"}`, "red");
+  });
+  p.appendChild(btn);
+}
+
+function unban(p) {
+  p.innerHTML = `<div class="sec-title" style="color:var(--text)">✅ Розбан</div>`;
+  label(p, "ID КОРИСТУВАЧА");
+  const uid = entryField(p, "Discord User ID");
+  const btn = document.createElement("button");
+  btn.className = "btn btn-green"; btn.textContent = "✅  Зняти бан";
+  btn.onclick = async () => {
+    const id = uid.value.trim();
+    if (!id) { log("❌ Введи ID!", "red"); return; }
+    const r = await api("DELETE", `/guilds/${selGuild.id}/bans/${id}`);
+    if (r && r.status === 204) log(`✅ Розбан ${id}`, "green");
+    else log(`❌ ${r?.status ?? "?"}`, "red");
+  };
+  p.appendChild(btn);
+}
+
+// ══════════════════════════════════════════════════════
+//  TROLL TAB
+// ══════════════════════════════════════════════════════
+function troll(p) {
+  p.innerHTML = `<div class="sec-title" style="color:var(--accent2)">😈 ТРОЛЬ</div>`;
+  const warn = document.createElement("div"); warn.className = "warn-box";
+  warn.textContent = "⚠️ Тільки для жартів! Використовуй відповідально.";
+  p.appendChild(warn);
+
+  label(p, "КАНАЛ ДЛЯ ТРОЛЮ");
+  const chSel = chSelect("troll-ch"); p.appendChild(chSel);
+  badge(p);
+
+  // Текст-спам інпут
+  label(p, "ТЕКСТ ДЛЯ СПАМУ (або залиш пусто = рандом)");
+  const spamWrap = document.createElement("div"); spamWrap.className = "field";
+  spamWrap.style.borderLeftColor = "var(--accent2)";
+  const spamInp = document.createElement("input"); spamInp.placeholder = "Введи текст або залиш пусто...";
+  spamWrap.appendChild(spamInp); p.appendChild(spamWrap);
+
+  // Медіа file input
+  label(p, "МЕДІА-ФАЙЛИ (гіфки / відео / фото)");
+  const dropZone = document.createElement("div"); dropZone.className = "field-drop";
+  dropZone.innerHTML = `
+    <div id="file-drop" onclick="document.getElementById('media-input').click()">
+      <input type="file" id="media-input" multiple accept="image/*,video/*" style="display:none">
+      <div>📎 Клікни або перетягни файли сюди</div>
+      <div id="file-list" style="margin-top:6px;color:var(--accent);font-size:9px"></div>
+    </div>`;
+  p.appendChild(dropZone);
+
+  const mediaInput = dropZone.querySelector("#media-input");
+  const fileList   = dropZone.querySelector("#file-list");
+  const fileDrop   = dropZone.querySelector("#file-drop");
+
+  mediaInput.onchange = () => updateFileList(mediaInput.files, fileList);
+  fileDrop.ondragover = e => { e.preventDefault(); fileDrop.classList.add("dragover"); };
+  fileDrop.ondragleave = () => fileDrop.classList.remove("dragover");
+  fileDrop.ondrop = e => {
+    e.preventDefault(); fileDrop.classList.remove("dragover");
+    mediaInput.files = e.dataTransfer.files;
+    updateFileList(e.dataTransfer.files, fileList);
+  };
+
+  // Кнопки
+  const grid = document.createElement("div"); grid.className = "troll-grid"; p.appendChild(grid);
+
+  const trollBtns = [
+    ["🎉 Канал-спам ×20",        "var(--accent)",  "#fff", () => trollChSpam(chSel)],
+    ["📩 Спам в ЛС ×10",         "var(--purple)",  "#0C0C14", () => trollDmSpam()],
+    ["🎭 Мем-гіфки в канал",     "var(--accent2)", "#fff", () => trollGifs(chSel)],
+    ["🏓 Пінг @everyone ×10",    "var(--yellow)",  "#0C0C14", () => trollPing(chSel)],
+    ["💬 Текст-спам ×15",        "var(--blue)",    "#0C0C14", () => trollTextSpam(chSel, spamInp)],
+    ["📎 Відправити медіа-файли", "var(--green)",   "#0C0C14", () => trollMediaFiles(chSel, mediaInput)],
+  ];
+  trollBtns.forEach(([txt, bg, clr, fn]) => {
+    const b = document.createElement("button");
+    b.className = "troll-btn";
+    b.style.background = bg; b.style.color = clr;
+    b.textContent = txt; b.onclick = fn;
+    grid.appendChild(b);
+  });
+}
+
+function updateFileList(files, listEl) {
+  if (!files.length) { listEl.textContent = ""; return; }
+  listEl.innerHTML = Array.from(files).map(f => `• ${f.name} (${(f.size/1024).toFixed(0)}KB)`).join("<br>");
+}
+
+// ══════════════════════════════════════════════════════
+//  ДІЇ ТРОЛЮ
+// ══════════════════════════════════════════════════════
+async function trollChSpam(chSel) {
+  if (!selGuild) { log("❌ Обери сервер!", "red"); return; }
+  const chId = chSel.value;
+  const chName = chSel.options[chSel.selectedIndex]?.text ?? chId;
+  confirm2("КАНАЛ-СПАМ", `Надіслати 20 повід. в ${chName} і видалити через 60 сек?`, async () => {
+    log(`🎉 Спам в ${chName}...`, "purple");
+    const ids = [];
+    for (let i = 0; i < 20; i++) {
+      const r = await api("POST", `/channels/${chId}/messages`, { content: `🍉 #${i+1} | ${rand(MEME_TEXTS)}` });
+      if (r && [200,201].includes(r.status)) { ids.push((await r.json()).id); log(`  ↑ ${i+1}/20`, "dim"); }
+      await sleep(400);
+    }
+    log("⏳ Чекаємо 60 сек...", "yellow"); await sleep(60000);
+    let ok = 0;
+    for (const id of ids) {
+      const r2 = await api("DELETE", `/channels/${chId}/messages/${id}`);
+      if (r2 && r2.status === 204) ok++;
+      await sleep(300);
+    }
+    log(`✅ Видалено ${ok}/${ids.length}`, "green");
+  });
+}
+
+async function trollDmSpam() {
+  if (!selGuild || !selMember) { log("❌ Обери сервер і учасника!", "red"); return; }
+  confirm2("ЛС СПАМ", `Надіслати 10 повід. в ЛС @${selMember.name} і видалити через 60 сек?`, async () => {
+    log(`📩 Відкриваємо ЛС з @${selMember.name} (ID: ${selMember.id})...`, "purple");
+    const r = await api("POST", "/users/@me/channels", { recipient_id: selMember.id });
+    if (!r || ![200,201].includes(r.status)) {
+      log(`❌ Не вдалося відкрити ЛС [${r?.status ?? "?"}]: ${(await r?.text())?.slice(0,100) ?? ""}`, "red");
+      log("💡 Якщо токен User — переключи кнопку 🤖 Bot → 👤 User", "yellow"); return;
+    }
+    const chId = (await r.json()).id;
+    log(`✅ ЛС-канал: ${chId}`, "dim");
+    const ids = [];
+    for (let i = 0; i < 10; i++) {
+      const r2 = await api("POST", `/channels/${chId}/messages`, { content: `👋 #${i+1} | ${rand(MEME_TEXTS)}` });
+      if (r2 && [200,201].includes(r2.status)) { ids.push((await r2.json()).id); log(`  📩 ${i+1}/10`, "dim"); }
+      else log(`  ⚠️ ${i+1}: ${r2?.status ?? "?"} — ${(await r2?.text())?.slice(0,60) ?? ""}`, "yellow");
+      await sleep(500);
+    }
+    log("⏳ Чекаємо 60 сек...", "yellow"); await sleep(60000);
+    let ok = 0;
+    for (const id of ids) {
+      const r3 = await api("DELETE", `/channels/${chId}/messages/${id}`);
+      if (r3 && r3.status === 204) ok++;
+      await sleep(300);
+    }
+    log(`✅ ЛС-спам: видалено ${ok}/${ids.length}`, "green");
+  });
+}
+
+async function trollGifs(chSel) {
+  if (!selGuild) { log("❌ Обери сервер!", "red"); return; }
+  const chId = chSel.value;
+  const chName = chSel.options[chSel.selectedIndex]?.text ?? chId;
+  confirm2("МЕМ-ГІФКИ", `Надіслати ${MEME_GIFS.length} гіфок в ${chName} і видалити через 60 сек?`, async () => {
+    log(`🎭 Гіфки в ${chName}...`, "purple");
+    const ids = [];
+    for (let i = 0; i < MEME_GIFS.length; i++) {
+      const r = await api("POST", `/channels/${chId}/messages`,
+        { content: `${rand(MEME_TEXTS)}\n${MEME_GIFS[i]}` });
+      if (r && [200,201].includes(r.status)) { ids.push((await r.json()).id); log(`  🎭 ${i+1}/${MEME_GIFS.length}`, "dim"); }
+      await sleep(500);
+    }
+    log("⏳ Чекаємо 60 сек...", "yellow"); await sleep(60000);
+    let ok = 0;
+    for (const id of ids) {
+      const r2 = await api("DELETE", `/channels/${chId}/messages/${id}`);
+      if (r2 && r2.status === 204) ok++;
+      await sleep(300);
+    }
+    log(`✅ Гіфки видалено ${ok}/${ids.length}`, "green");
+  });
+}
+
+async function trollPing(chSel) {
+  if (!selGuild) { log("❌ Обери сервер!", "red"); return; }
+  const chId = chSel.value;
+  const chName = chSel.options[chSel.selectedIndex]?.text ?? chId;
+  confirm2("ПІНГ", `10 разів пінгнути @everyone в ${chName} і видалити через 60 сек?`, async () => {
+    log(`🏓 Пінг-флуд в ${chName}...`, "purple");
+    const ids = [];
+    for (let i = 0; i < 10; i++) {
+      const r = await api("POST", `/channels/${chId}/messages`,
+        { content: `@everyone 🍉 Пінг #${i+1}! ${rand(MEME_TEXTS)}` });
+      if (r && [200,201].includes(r.status)) { ids.push((await r.json()).id); log(`  🏓 ${i+1}/10`, "dim"); }
+      await sleep(500);
+    }
+    log("⏳ Чекаємо 60 сек...", "yellow"); await sleep(60000);
+    let ok = 0;
+    for (const id of ids) {
+      const r2 = await api("DELETE", `/channels/${chId}/messages/${id}`);
+      if (r2 && r2.status === 204) ok++;
+      await sleep(300);
+    }
+    log(`✅ Пінги видалено ${ok}/${ids.length}`, "green");
+  });
+}
+
+async function trollTextSpam(chSel, inp) {
+  if (!selGuild) { log("❌ Обери сервер!", "red"); return; }
+  const chId = chSel.value;
+  const chName = chSel.options[chSel.selectedIndex]?.text ?? chId;
+  const txt = inp.value.trim() || rand(SPAM_TEXTS);
+  confirm2("ТЕКСТ-СПАМ", `Надіслати "${txt.slice(0,40)}" 15 разів в ${chName} і видалити через 60 сек?`, async () => {
+    log(`💬 Текст-спам в ${chName}: ${txt.slice(0,40)}...`, "purple");
+    const ids = [];
+    for (let i = 0; i < 15; i++) {
+      const r = await api("POST", `/channels/${chId}/messages`, { content: `#${i+1} ${txt}` });
+      if (r && [200,201].includes(r.status)) { ids.push((await r.json()).id); log(`  💬 ${i+1}/15`, "dim"); }
+      await sleep(400);
+    }
+    log("⏳ Чекаємо 60 сек...", "yellow"); await sleep(60000);
+    let ok = 0;
+    for (const id of ids) {
+      const r2 = await api("DELETE", `/channels/${chId}/messages/${id}`);
+      if (r2 && r2.status === 204) ok++;
+      await sleep(300);
+    }
+    log(`✅ Текст-спам: видалено ${ok}/${ids.length}`, "green");
+  });
+}
+
+async function trollMediaFiles(chSel, mediaInput) {
+  if (!selGuild) { log("❌ Обери сервер!", "red"); return; }
+  const files = Array.from(mediaInput.files || []);
+  if (!files.length) { log("❌ Обери файли через 📎 зону!", "red"); return; }
+  const chId = chSel.value;
+  const chName = chSel.options[chSel.selectedIndex]?.text ?? chId;
+  confirm2("МЕДІА-СПАМ", `Надіслати ${files.length} файлів у ${chName} і видалити через 60 сек?`, async () => {
+    log(`📎 Медіа-спам в ${chName} (${files.length} файлів)...`, "purple");
+    const captions = ["👀 дивись", "🤡 хаха", "😈 троль", "🍉 кавун", "🔥 вогонь", "FBI IM WATCHING"];
+    const ids = [];
+    for (let i = 0; i < files.length; i++) {
+      const r = await apiUpload(chId, files[i], `${rand(captions)} #${i+1}`);
+      if (r && [200,201].includes(r.status)) { ids.push((await r.json()).id); log(`  📎 ${files[i].name} (${i+1}/${files.length})`, "dim"); }
+      else log(`  ❌ ${files[i].name}: ${r?.status ?? "?"}`, "red");
+      await sleep(1000);
+    }
+    log("⏳ Чекаємо 60 сек...", "yellow"); await sleep(60000);
+    let ok = 0;
+    for (const id of ids) {
+      const r2 = await api("DELETE", `/channels/${chId}/messages/${id}`);
+      if (r2 && r2.status === 204) ok++;
+      await sleep(300);
+    }
+    log(`✅ Медіа-спам: видалено ${ok}/${ids.length}`, "green");
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════════════
+function confirm2(title, body, cb) {
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-body").textContent  = body;
+  document.getElementById("modal-overlay").classList.add("show");
+  modalCb = cb;
+}
+function modalConfirm() {
+  document.getElementById("modal-overlay").classList.remove("show");
+  if (modalCb) { modalCb(); modalCb = null; }
+}
+function modalCancel() {
+  document.getElementById("modal-overlay").classList.remove("show");
+  modalCb = null;
+}
+document.getElementById("modal-overlay").onclick = e => {
+  if (e.target === document.getElementById("modal-overlay")) modalCancel();
+};
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+switchTab("msg");
+log("🍉 WatermelonBOT Panel v5.1 Web — готовий", "green");
+log("1️⃣  Вставте токен і натисніть ▶ Підключити", "dim");
+log("2️⃣  Якщо user-токен — переключи 🤖 Bot → 👤 User", "dim");
+log("3️⃣  Оберіть сервер → учасника → дію", "dim");
+
+// Enter у токен-інпуті — підключення
+document.getElementById("token-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") connectBot();
+});
+
+</script>
+</body>
+</html>
